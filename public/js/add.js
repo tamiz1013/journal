@@ -15,7 +15,11 @@ const shotImg = document.getElementById('shot-img');
 const fileInput = document.getElementById('file-input');
 const submitBtn = document.getElementById('submit-btn');
 
-document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+function setNow() {
+  document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('time').value = new Date().toTimeString().slice(0, 5);
+}
+setNow();
 
 let screenshotData = null;
 
@@ -94,6 +98,7 @@ form.addEventListener('submit', async (e) => {
 
   const body = {
     date: form.date.value,
+    time: form.time.value,
     asset: assetSel.value,
     assetOther: assetOtherInput.value,
     direction: form.direction.value,
@@ -123,7 +128,7 @@ form.addEventListener('submit', async (e) => {
     }
     toast('Trade saved ✓');
     form.reset();
-    document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+    setNow();
     assetOtherField.hidden = true;
     rrOtherField.hidden = true;
     clearScreenshot();

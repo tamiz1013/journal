@@ -2,9 +2,11 @@ version: '3'
 
 
 services:
-  Journal:
+  journal:
     build: .
     container_name: journal
     ports:
       - "3001:3000"
+    env_file:
+      - .env
     restart: always

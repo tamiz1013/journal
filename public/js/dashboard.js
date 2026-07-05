@@ -34,6 +34,7 @@ async function init() {
   renderEquityChart(stats);
   renderDailyChart(stats);
   renderCalendar();
+  renderAnalytics();
   renderRecent();
 
   document.getElementById('cal-prev').addEventListener('click', () => shiftMonth(-1));
@@ -313,6 +314,148 @@ function renderCalendar() {
     }
   }
   grid.innerHTML = html;
+}
+
+// ---------- Analytics: strategy / asset / mindset / insights ----------
+function groupNet(trades, keyFn) {
+  const m = new Map();
+  for (const t of trades) {
+    const k = keyFn(t);
+    m.set(k, (m.get(k) || 0) + t.net);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function netBarChart(canvasId, entries, horizontal) {
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels: entries.map(([k]) => k),
+      datasets: [{
+        label: 'Net P&L',
+        data: entries.map(([, v]) => v),
+        backgroundColor: entries.map(([, v]) => (v >= 0 ? GOOD : BAD)),
+        borderRadius: 4,
+        maxBarThickness: 22,
+      }],
+    },
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      maintainAspectRatio: false,
+      scales: {
+        [horizontal ? 'x' : 'y']: {
+          grid: { color: TRACK },
+          border: { display: false },
+          ticks: { callback: (v) => fmtMoney(v) },
+        },
+        [horizontal ? 'y' : 'x']: { grid: { display: false } },
+      },
+      plugins: {
+        tooltip: { callbacks: { label: (c) => ` ${fmtMoney(horizontal ? c.parsed.x : c.parsed.y)}` } },
+      },
+    },
+  });
+}
+
+// Win % at each 0/3/5/7/9 self-rating, for psychology and confidence
+function winPctByRating(trades, field) {
+  return [0, 3, 5, 7, 9].map((r) => {
+    const decided = trades.filter((t) => t[field] === r && t.outcome !== 'BE');
+    if (!decided.length) return null;
+    return (decided.filter((t) => t.outcome === 'WIN').length / decided.length) * 100;
+  });
+}
+
+function renderAnalytics() {
+  if (!allTrades.length) return;
+  document.getElementById('analytics-row').hidden = false;
+  document.getElementById('analytics-row2').hidden = false;
+
+  netBarChart('strategy-chart', groupNet(allTrades, (t) => t.strategy), true);
+  netBarChart('asset-chart', groupNet(allTrades, (t) => t.asset), false);
+
+  new Chart(document.getElementById('mindset-chart'), {
+    type: 'bar',
+    data: {
+      labels: ['0', '3', '5', '7', '9'],
+      datasets: [
+        {
+          label: 'Psychology',
+          data: winPctByRating(allTrades, 'psychology'),
+          backgroundColor: ACCENT,
+          borderRadius: 4,
+          maxBarThickness: 20,
+        },
+        {
+          label: 'Confidence',
+          data: winPctByRating(allTrades, 'confidence'),
+          backgroundColor: '#199e70',
+          borderRadius: 4,
+          maxBarThickness: 20,
+        },
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0, max: 100,
+          grid: { color: TRACK },
+          border: { display: false },
+          ticks: { callback: (v) => v + '%' },
+        },
+        x: { grid: { display: false }, title: { display: true, text: 'Your rating at entry' } },
+      },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 10, boxHeight: 10 } },
+        tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y === null ? 'no trades' : c.parsed.y.toFixed(0) + '%'}` } },
+      },
+    },
+  });
+
+  renderInsights();
+}
+
+function renderInsights() {
+  const byStrategy = groupNet(allTrades, (t) => t.strategy);
+  const byAsset = groupNet(allTrades, (t) => t.asset);
+  const best = byStrategy[0];
+  const worst = byStrategy[byStrategy.length - 1];
+
+  // Streaks over trades ordered oldest → newest (BE trades don't break a streak)
+  const ordered = [...allTrades].reverse();
+  let cur = 0, longestWin = 0, longestLoss = 0, run = 0, runType = null;
+  for (const t of ordered) {
+    if (t.outcome === 'BE') continue;
+    if (t.outcome === runType) run++;
+    else { runType = t.outcome; run = 1; }
+    if (runType === 'WIN') longestWin = Math.max(longestWin, run);
+    else longestLoss = Math.max(longestLoss, run);
+    cur = (runType === 'WIN' ? 1 : -1) * run;
+  }
+
+  const avg = (arr, f) => (arr.length ? arr.reduce((s, t) => s + t[f], 0) / arr.length : null);
+  const wins = allTrades.filter((t) => t.outcome === 'WIN');
+  const losses = allTrades.filter((t) => t.outcome === 'LOSS');
+  const psyWin = avg(wins, 'psychology');
+  const psyLoss = avg(losses, 'psychology');
+  const buys = allTrades.filter((t) => t.direction === 'BUY' && t.outcome !== 'BE');
+  const sells = allTrades.filter((t) => t.direction === 'SELL' && t.outcome !== 'BE');
+  const winRate = (arr) => (arr.length ? ((arr.filter((t) => t.outcome === 'WIN').length / arr.length) * 100).toFixed(0) + '%' : '—');
+
+  const rows = [
+    ['Best strategy', best ? `${best[0]} (${fmtMoney(best[1])})` : '—', best && best[1] > 0 ? 'pos' : ''],
+    ['Worst strategy', worst && worst !== best ? `${worst[0]} (${fmtMoney(worst[1])})` : '—', worst && worst[1] < 0 ? 'neg' : ''],
+    ['Most profitable asset', byAsset[0] ? `${byAsset[0][0]} (${fmtMoney(byAsset[0][1])})` : '—', byAsset[0] && byAsset[0][1] > 0 ? 'pos' : ''],
+    ['Current streak', cur === 0 ? '—' : `${Math.abs(cur)} ${cur > 0 ? 'win' : 'loss'}${Math.abs(cur) > 1 ? 's' : ''}`, cur > 0 ? 'pos' : cur < 0 ? 'neg' : ''],
+    ['Longest win / loss streak', `${longestWin} / ${longestLoss}`, ''],
+    ['BUY vs SELL win rate', `${winRate(buys)} vs ${winRate(sells)}`, ''],
+    ['Avg psychology on wins vs losses',
+      psyWin === null || psyLoss === null ? '—' : `${psyWin.toFixed(1)} vs ${psyLoss.toFixed(1)}`, ''],
+  ];
+
+  document.getElementById('insights').innerHTML = rows.map(([k, v, cls]) =>
+    `<li><span class="k">${k}</span><span class="v ${cls}">${escapeHtml(String(v))}</span></li>`).join('');
 }
 
 // ---------- Recent trades table ----------

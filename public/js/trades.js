@@ -26,6 +26,7 @@ async function load() {
   body.innerHTML = trades.map((t) => `
     <tr data-id="${t.id}">
       <td>${t.date}</td>
+      <td>${t.time || '—'}</td>
       <td><strong style="color:var(--ink)">${escapeHtml(t.asset)}</strong></td>
       <td><span class="badge ${t.direction.toLowerCase()}">${t.direction}</span></td>
       <td>${t.type}</td>

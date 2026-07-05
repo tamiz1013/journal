@@ -136,7 +136,7 @@ function parseId(id) {
 // List trades — screenshots excluded to keep the payload small
 app.get('/api/trades', requireAuth, async (req, res) => {
   const docs = await db.trades()
-    .find(userFilter(req), { projection: { note: 1, date: 1, asset: 1, direction: 1, type: 1,
+    .find(userFilter(req), { projection: { note: 1, date: 1, time: 1, asset: 1, direction: 1, type: 1,
       strategy: 1, psychology: 1, confidence: 1, tf_1d: 1, tf_1h: 1, tf_5m: 1, rr: 1, pnl: 1, fee: 1,
       screenshot: { $cond: [{ $gt: ['$screenshot', null] }, true, false] } } })
     .sort({ date: -1, _id: -1 })
@@ -174,6 +174,7 @@ app.post('/api/trades', requireAuth, async (req, res) => {
   const doc = {
     userId: new ObjectId(req.session.userId),
     date: b.date || new Date().toISOString().slice(0, 10),
+    time: /^\d{2}:\d{2}$/.test(b.time || '') ? b.time : '',
     asset,
     direction: b.direction === 'SELL' ? 'SELL' : 'BUY',
     type: b.type === 'NEWS' ? 'NEWS' : 'CHART',
