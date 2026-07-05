@@ -42,10 +42,14 @@ async function load() {
       <td><span class="badge ${t.outcome.toLowerCase()}">${t.outcome}</span></td>
       <td class="${t.net >= 0 ? 'pnl-pos' : 'pnl-neg'}">${fmtMoney(t.net)}</td>
       <td title="${escapeHtml(t.note || '')}" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(t.note || '—')}</td>
-      <td>${t.hasScreenshot
-        ? `<img class="thumb" src="/api/trades/${t.id}/screenshot" alt="screenshot" data-full="/api/trades/${t.id}/screenshot">`
+      <td>${t.screenshotCount
+        ? Array.from({ length: t.screenshotCount }, (_, i) =>
+            `<img class="thumb" src="/api/trades/${t.id}/screenshot/${i}" alt="screenshot ${i + 1}" data-full="/api/trades/${t.id}/screenshot/${i}">`).join(' ')
         : '—'}</td>
-      <td><button class="icon-btn" data-del="${t.id}" title="Delete trade">✕</button></td>
+      <td>
+        <a class="icon-btn edit" href="/add.html?edit=${t.id}" title="Edit trade">✎</a>
+        <button class="icon-btn" data-del="${t.id}" title="Delete trade">✕</button>
+      </td>
     </tr>`).join('');
 }
 

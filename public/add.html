@@ -88,21 +88,21 @@
           <div class="field">
             <label for="tf_1d">1D</label>
             <select id="tf_1d" name="tf_1d">
-              <option selected>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+              <option>0</option><option>3</option><option selected>5</option><option>7</option><option>9</option>
             </select>
           </div>
 
           <div class="field">
             <label for="tf_1h">1H</label>
             <select id="tf_1h" name="tf_1h">
-              <option selected>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+              <option>0</option><option>3</option><option selected>5</option><option>7</option><option>9</option>
             </select>
           </div>
 
           <div class="field">
             <label for="tf_5m">5m</label>
             <select id="tf_5m" name="tf_5m">
-              <option selected>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+              <option>0</option><option>3</option><option selected>5</option><option>7</option><option>9</option>
             </select>
           </div>
 
@@ -120,8 +120,8 @@
           </div>
 
           <div class="field">
-            <label for="pnl">P&amp;L ($) <span class="req">*</span></label>
-            <input type="number" id="pnl" name="pnl" step="0.01" placeholder="profit: 150 · loss: -75" required>
+            <label for="pnl">P&amp;L ($)</label>
+            <input type="number" id="pnl" name="pnl" step="0.01" placeholder="profit: 150 · loss: -75 · empty if still running">
           </div>
 
           <div class="field">
@@ -135,17 +135,14 @@
           </div>
 
           <div class="field full">
-            <label>Screenshot</label>
+            <label>Screenshots <small style="color:var(--muted);font-weight:400">(up to 3)</small></label>
             <div class="paste-zone" id="paste-zone" tabindex="0">
+              <div class="shots-grid" id="shots-grid" hidden></div>
               <div id="paste-placeholder">
                 📷 Paste a screenshot with <kbd>Ctrl</kbd>+<kbd>V</kbd>, click to browse, or drag &amp; drop
               </div>
-              <div id="paste-preview" hidden>
-                <img id="shot-img" alt="Screenshot preview">
-                <button type="button" class="remove-shot" id="remove-shot">Remove screenshot</button>
-              </div>
             </div>
-            <input type="file" id="file-input" accept="image/*" hidden>
+            <input type="file" id="file-input" accept="image/*" multiple hidden>
           </div>
 
           <div class="field full">

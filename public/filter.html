@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filter — Trading Journal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main">
+      <h1 class="page-title">Filter <small id="count-label"></small></h1>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Filters <button class="btn secondary reset-btn" id="reset-btn" type="button">Reset</button></div>
+        <div class="filter-grid">
+          <div class="field">
+            <label for="f-from">From date</label>
+            <input type="date" id="f-from">
+          </div>
+          <div class="field">
+            <label for="f-to">To date</label>
+            <input type="date" id="f-to">
+          </div>
+          <div class="field">
+            <label for="f-asset">Asset</label>
+            <select id="f-asset"><option value="">All</option></select>
+          </div>
+          <div class="field">
+            <label for="f-direction">Direction</label>
+            <select id="f-direction">
+              <option value="">All</option>
+              <option value="BUY">BUY</option>
+              <option value="SELL">SELL</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-type">Type</label>
+            <select id="f-type">
+              <option value="">All</option>
+              <option value="CHART">CHART</option>
+              <option value="NEWS">NEWS</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-strategy">Strategy</label>
+            <select id="f-strategy"><option value="">All</option></select>
+          </div>
+          <div class="field">
+            <label for="f-psychology">Psychology</label>
+            <select id="f-psychology">
+              <option value="">All</option>
+              <option>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-confidence">Confidence</label>
+            <select id="f-confidence">
+              <option value="">All</option>
+              <option>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-pnl-op">Net P&amp;L</label>
+            <div class="pnl-filter">
+              <select id="f-pnl-op" style="max-width:150px">
+                <option value="">Any</option>
+                <option value="gt">Greater than</option>
+                <option value="lt">Less than</option>
+              </select>
+              <input type="number" id="f-pnl-val" step="0.01" placeholder="e.g. 0 or 100" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics for the filtered trades -->
+      <div class="tiles four" id="stat-tiles"></div>
+
+      <!-- Matching trades -->
+      <div class="card">
+        <div class="card-title">Matching trades</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Time</th><th>Asset</th><th>Dir</th><th>Type</th><th>Strategy</th>
+                <th>Psy</th><th>Conf</th><th>RR</th><th>P&amp;L</th><th>Fee</th><th>Result</th><th>Net</th>
+              </tr>
+            </thead>
+            <tbody id="filtered-body"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-state" hidden>
+          No trades match these filters.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/filter.js"></script>
+</body>
+</html>

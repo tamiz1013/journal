@@ -5,6 +5,7 @@ function renderNav(active) {
     dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
     add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
     trades: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+    filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4H2l8 9v6l4 2v-8l8-9z"/></svg>',
     logout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
   };
   document.getElementById('sidebar').innerHTML = `
@@ -12,6 +13,7 @@ function renderNav(active) {
     <a class="nav-link ${active === 'dashboard' ? 'active' : ''}" href="/">${icons.dashboard} Dashboard</a>
     <a class="nav-link ${active === 'add' ? 'active' : ''}" href="/add.html">${icons.add} Add Trade</a>
     <a class="nav-link ${active === 'trades' ? 'active' : ''}" href="/trades.html">${icons.trades} Trades</a>
+    <a class="nav-link ${active === 'filter' ? 'active' : ''}" href="/filter.html">${icons.filter} Filter</a>
     <div class="nav-footer">
       <div class="nav-user" id="nav-user"></div>
       <button class="nav-link nav-logout" id="logout-btn" type="button">${icons.logout} Log out</button>

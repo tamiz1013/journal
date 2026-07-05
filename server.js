@@ -133,27 +133,84 @@ function parseId(id) {
   try { return new ObjectId(id); } catch { return null; }
 }
 
+// Screenshots: new docs store an array in `screenshots`; old docs have a single `screenshot`
+function docShots(doc) {
+  if (Array.isArray(doc.screenshots)) return doc.screenshots;
+  return doc.screenshot ? [doc.screenshot] : [];
+}
+
+// Validate the request body into a trade document (shared by create and update)
+function buildTrade(b) {
+  const required = ['asset', 'direction', 'type', 'strategy'];
+  for (const f of required) {
+    if (!b[f]) return { error: `Missing field: ${f}` };
+  }
+  const asset = b.asset === 'OTHER' ? (b.assetOther || '').trim().toUpperCase() : b.asset;
+  if (!asset) return { error: 'Asset name is required' };
+
+  const screenshots = (Array.isArray(b.screenshots) ? b.screenshots : [b.screenshot])
+    .filter((s) => /^data:image\/[a-z+]+;base64,/.test(s || ''))
+    .slice(0, 3);
+
+  return {
+    doc: {
+      date: b.date || new Date().toISOString().slice(0, 10),
+      time: /^\d{2}:\d{2}$/.test(b.time || '') ? b.time : '',
+      asset,
+      direction: b.direction === 'SELL' ? 'SELL' : 'BUY',
+      type: b.type === 'NEWS' ? 'NEWS' : 'CHART',
+      strategy: String(b.strategy),
+      psychology: Number(b.psychology) || 0,
+      confidence: Number(b.confidence) || 0,
+      tf_1d: Number(b.tf_1d) || 0,
+      tf_1h: Number(b.tf_1h) || 0,
+      tf_5m: Number(b.tf_5m) || 0,
+      rr: Number(b.rr) || 0,
+      pnl: Number(b.pnl) || 0,                  // signed: profit positive, loss negative
+      fee: Math.abs(Number(b.fee)) || 0,        // always positive, always deducted
+      note: b.note || '',
+      screenshots,
+    },
+  };
+}
+
 // List trades — screenshots excluded to keep the payload small
 app.get('/api/trades', requireAuth, async (req, res) => {
   const docs = await db.trades()
     .find(userFilter(req), { projection: { note: 1, date: 1, time: 1, asset: 1, direction: 1, type: 1,
       strategy: 1, psychology: 1, confidence: 1, tf_1d: 1, tf_1h: 1, tf_5m: 1, rr: 1, pnl: 1, fee: 1,
-      screenshot: { $cond: [{ $gt: ['$screenshot', null] }, true, false] } } })
+      screenshotCount: { $cond: [
+        { $isArray: '$screenshots' },
+        { $size: '$screenshots' },
+        { $cond: [{ $gt: ['$screenshot', null] }, 1, 0] },
+      ] } } })
     .sort({ date: -1, _id: -1 })
     .toArray();
   res.json(docs.map((d) => {
-    const { _id, userId, screenshot, ...rest } = d;
-    return { id: _id.toString(), hasScreenshot: !!screenshot, ...rest };
+    const { _id, userId, ...rest } = d;
+    return { id: _id.toString(), ...rest };
   }));
 });
 
-// Full-size screenshot for one trade
-app.get('/api/trades/:id/screenshot', requireAuth, async (req, res) => {
+// One full trade, screenshots included as data URLs (used by the edit form)
+app.get('/api/trades/:id', requireAuth, async (req, res) => {
   const _id = parseId(req.params.id);
   if (!_id) return res.status(400).json({ error: 'Bad id' });
-  const doc = await db.trades().findOne(userFilter(req, { _id }), { projection: { screenshot: 1 } });
-  if (!doc || !doc.screenshot) return res.status(404).json({ error: 'No screenshot' });
-  const match = /^data:(image\/[a-z+]+);base64,(.+)$/.exec(doc.screenshot);
+  const doc = await db.trades().findOne(userFilter(req, { _id }));
+  if (!doc) return res.status(404).json({ error: 'Not found' });
+  const { _id: docId, userId, screenshot, screenshots, ...rest } = doc;
+  res.json({ id: docId.toString(), screenshots: docShots(doc), ...rest });
+});
+
+// Full-size screenshot for one trade (idx 0–2; omitted = first)
+app.get('/api/trades/:id/screenshot/:idx?', requireAuth, async (req, res) => {
+  const _id = parseId(req.params.id);
+  if (!_id) return res.status(400).json({ error: 'Bad id' });
+  const doc = await db.trades().findOne(userFilter(req, { _id }),
+    { projection: { screenshot: 1, screenshots: 1 } });
+  const shot = doc && docShots(doc)[Number(req.params.idx) || 0];
+  if (!shot) return res.status(404).json({ error: 'No screenshot' });
+  const match = /^data:(image\/[a-z+]+);base64,(.+)$/.exec(shot);
   if (!match) return res.status(500).json({ error: 'Corrupt screenshot' });
   res.set('Content-Type', match[1]);
   res.set('Cache-Control', 'private, max-age=86400');
@@ -161,39 +218,26 @@ app.get('/api/trades/:id/screenshot', requireAuth, async (req, res) => {
 });
 
 app.post('/api/trades', requireAuth, async (req, res) => {
-  const b = req.body;
-  const required = ['asset', 'direction', 'type', 'strategy'];
-  for (const f of required) {
-    if (!b[f]) return res.status(400).json({ error: `Missing field: ${f}` });
-  }
-  const asset = b.asset === 'OTHER' ? (b.assetOther || '').trim().toUpperCase() : b.asset;
-  if (!asset) return res.status(400).json({ error: 'Asset name is required' });
-
-  const screenshot = /^data:image\/[a-z+]+;base64,/.test(b.screenshot || '') ? b.screenshot : null;
-
-  const doc = {
-    userId: new ObjectId(req.session.userId),
-    date: b.date || new Date().toISOString().slice(0, 10),
-    time: /^\d{2}:\d{2}$/.test(b.time || '') ? b.time : '',
-    asset,
-    direction: b.direction === 'SELL' ? 'SELL' : 'BUY',
-    type: b.type === 'NEWS' ? 'NEWS' : 'CHART',
-    strategy: String(b.strategy),
-    psychology: Number(b.psychology) || 0,
-    confidence: Number(b.confidence) || 0,
-    tf_1d: Number(b.tf_1d) || 0,
-    tf_1h: Number(b.tf_1h) || 0,
-    tf_5m: Number(b.tf_5m) || 0,
-    rr: Number(b.rr) || 0,
-    pnl: Number(b.pnl) || 0,                  // signed: profit positive, loss negative
-    fee: Math.abs(Number(b.fee)) || 0,        // always positive, always deducted
-    note: b.note || '',
-    screenshot,
-    createdAt: new Date(),
-  };
+  const { error, doc } = buildTrade(req.body);
+  if (error) return res.status(400).json({ error });
+  doc.userId = new ObjectId(req.session.userId);
+  doc.createdAt = new Date();
   const result = await db.trades().insertOne(doc);
-  const { userId, screenshot: s, ...rest } = doc;
-  res.json({ id: result.insertedId.toString(), hasScreenshot: !!s, ...rest });
+  const { userId, screenshots, ...rest } = doc;
+  res.json({ id: result.insertedId.toString(), screenshotCount: screenshots.length, ...rest });
+});
+
+app.put('/api/trades/:id', requireAuth, async (req, res) => {
+  const _id = parseId(req.params.id);
+  if (!_id) return res.status(400).json({ error: 'Bad id' });
+  const { error, doc } = buildTrade(req.body);
+  if (error) return res.status(400).json({ error });
+  const result = await db.trades().updateOne(userFilter(req, { _id }), {
+    $set: doc,
+    $unset: { screenshot: '' }, // drop the legacy single-screenshot field on update
+  });
+  if (!result.matchedCount) return res.status(404).json({ error: 'Not found' });
+  res.json({ ok: true });
 });
 
 app.delete('/api/trades/:id', requireAuth, async (req, res) => {
