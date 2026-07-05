@@ -19,9 +19,12 @@ async function load() {
   document.getElementById('empty-state').hidden = trades.length > 0;
 
   for (const t of trades) {
+    t.open = !t.pnl; // no PnL written yet → trade still running
     t.net = t.pnl - (t.fee || 0);
-    t.outcome = t.net > 0 ? 'WIN' : t.net < 0 ? 'LOSS' : 'BE';
+    t.outcome = t.open ? 'OPEN' : t.net > 0 ? 'WIN' : t.net < 0 ? 'LOSS' : 'BE';
   }
+  // Open trades pinned on top for quick updating; completed ones keep date order
+  trades.sort((a, b) => (b.open ? 1 : 0) - (a.open ? 1 : 0));
 
   body.innerHTML = trades.map((t) => `
     <tr data-id="${t.id}">
@@ -37,10 +40,10 @@ async function load() {
       <td>${t.tf_1h}</td>
       <td>${t.tf_5m}</td>
       <td>${t.rr}R</td>
-      <td>${fmtMoney(t.pnl)}</td>
+      <td>${t.open ? '—' : fmtMoney(t.pnl)}</td>
       <td>${t.fee ? fmtMoney(t.fee) : '—'}</td>
       <td><span class="badge ${t.outcome.toLowerCase()}">${t.outcome}</span></td>
-      <td class="${t.net >= 0 ? 'pnl-pos' : 'pnl-neg'}">${fmtMoney(t.net)}</td>
+      <td class="${t.open ? '' : t.net >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.open ? '—' : fmtMoney(t.net)}</td>
       <td title="${escapeHtml(t.note || '')}" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(t.note || '—')}</td>
       <td>${t.screenshotCount
         ? Array.from({ length: t.screenshotCount }, (_, i) =>

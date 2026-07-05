@@ -203,6 +203,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .badge.win { background: rgba(12, 163, 12, 0.15); color: var(--good); }
 .badge.loss { background: rgba(208, 59, 59, 0.15); color: var(--bad); }
 .badge.be { background: var(--surface-2); color: var(--ink-2); }
+.badge.open { background: rgba(57, 135, 229, 0.15); color: var(--accent); }
 
 .pnl-pos { color: var(--good); font-weight: 600; }
 .pnl-neg { color: var(--bad); font-weight: 600; }
