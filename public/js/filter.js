@@ -25,6 +25,8 @@ async function init() {
     toast(err.message, true);
     return;
   }
+  // Open trades (no PnL written yet) don't count until completed
+  allTrades = allTrades.filter((t) => t.pnl);
   for (const t of allTrades) {
     t.net = t.pnl - (t.fee || 0);
     t.outcome = t.net > 0 ? 'WIN' : t.net < 0 ? 'LOSS' : 'BE';
