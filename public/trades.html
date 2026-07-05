@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trades — Trading Journal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main">
+      <h1 class="page-title">All Trades <small id="count-label"></small></h1>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Asset</th><th>Dir</th><th>Type</th><th>Strategy</th>
+                <th>Psy</th><th>Conf</th><th>1D</th><th>1H</th><th>5m</th><th>RR</th>
+                <th>P&amp;L</th><th>Fee</th><th>Result</th><th>Net</th><th>Note</th><th>Shot</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="trades-body"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-state" hidden>
+          No trades yet — <a href="/add.html">add your first trade</a>.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="lightbox" id="lightbox"><img id="lightbox-img" alt="Trade screenshot"></div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/trades.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Trading Journal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main">
+      <h1 class="page-title">Dashboard <small id="range-label"></small></h1>
+
+      <!-- Top stat tiles -->
+      <div class="tiles">
+        <div class="card tile">
+          <div>
+            <div class="card-title">Net P&amp;L <span class="count-pill" id="trade-count">0</span></div>
+            <div class="value" id="net-pnl">--</div>
+            <div class="sub" id="pnl-sub"></div>
+          </div>
+        </div>
+        <div class="card tile">
+          <div>
+            <div class="card-title">Trade win %</div>
+            <div class="value" id="win-pct">--</div>
+            <div class="sub" id="win-sub"></div>
+          </div>
+          <div class="viz"><canvas id="win-donut" width="62" height="62"></canvas></div>
+        </div>
+        <div class="card tile">
+          <div>
+            <div class="card-title">Profit factor</div>
+            <div class="value" id="profit-factor">--</div>
+          </div>
+          <div class="viz"><canvas id="pf-donut" width="62" height="62"></canvas></div>
+        </div>
+        <div class="card tile">
+          <div>
+            <div class="card-title">Day win %</div>
+            <div class="value" id="day-win-pct">--</div>
+            <div class="sub" id="day-win-sub"></div>
+          </div>
+          <div class="viz"><canvas id="day-donut" width="62" height="62"></canvas></div>
+        </div>
+        <div class="card tile">
+          <div style="flex:1">
+            <div class="card-title">Avg win/loss trade</div>
+            <div class="value" id="avg-wl">--</div>
+            <div class="split-bar" id="wl-bar" hidden>
+              <div class="w"></div><div class="l"></div>
+            </div>
+            <div class="split-legend" id="wl-legend" hidden>
+              <span class="w" id="avg-win">--</span><span class="l" id="avg-loss">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score + equity curve -->
+      <div class="dash-row score">
+        <div class="card">
+          <div class="card-title">Journal score</div>
+          <div class="gauge-box"><canvas id="score-gauge"></canvas></div>
+          <div class="score-value">
+            <div class="num" id="score-num">--</div>
+            <div class="lbl">win rate · profit factor · risk/reward · discipline</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Daily net cumulative P&amp;L</div>
+          <div class="chart-box"><canvas id="equity-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Daily P&L bars + calendar -->
+      <div class="dash-row two">
+        <div class="card">
+          <div class="card-title">Net daily P&amp;L</div>
+          <div class="chart-box"><canvas id="daily-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="cal-head">
+            <button id="cal-prev" title="Previous month">‹</button>
+            <div class="card-title" style="margin:0" id="cal-title"></div>
+            <button id="cal-next" title="Next month">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+      </div>
+
+      <!-- Recent trades -->
+      <div class="card">
+        <div class="card-title">Recent trades</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Asset</th><th>Direction</th><th>Strategy</th>
+                <th>RR</th><th>Fee</th><th>Result</th><th>Net P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="recent-body"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-state" hidden>
+          No trades yet — <a href="/add.html">add your first trade</a> to see your stats.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/vendor/chart.umd.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

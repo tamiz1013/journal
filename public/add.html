@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Trade — Trading Journal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main">
+      <h1 class="page-title">Add Trade</h1>
+
+      <form id="trade-form" class="card form-card">
+        <div class="form-grid">
+          <div class="field">
+            <label for="date">Date <span class="req">*</span></label>
+            <input type="date" id="date" name="date" required>
+          </div>
+
+          <div class="field">
+            <label for="asset">Asset <span class="req">*</span></label>
+            <select id="asset" name="asset" required>
+              <option value="GOLD">GOLD</option>
+              <option value="BTC">BTC</option>
+              <option value="OIL">OIL</option>
+              <option value="OTHER">OTHER</option>
+            </select>
+          </div>
+
+          <div class="field" id="asset-other-field" hidden>
+            <label for="assetOther">Other Asset Name <span class="req">*</span></label>
+            <input type="text" id="assetOther" name="assetOther" placeholder="e.g. EURUSD">
+          </div>
+
+          <div class="field">
+            <label for="direction">Direction <span class="req">*</span></label>
+            <select id="direction" name="direction" required>
+              <option value="BUY">BUY</option>
+              <option value="SELL">SELL</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="type">Type <span class="req">*</span></label>
+            <select id="type" name="type" required>
+              <option value="CHART">CHART</option>
+              <option value="NEWS">NEWS</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="strategy">Strategy <span class="req">*</span></label>
+            <select id="strategy" name="strategy" required>
+              <option>Price Action</option>
+              <option>Incline</option>
+              <option>Breakout</option>
+              <option>News</option>
+              <option>Trend</option>
+              <option>Reverse</option>
+              <option>Falling knife</option>
+              <option>50Fifty</option>
+              <option>Support</option>
+              <option>Resistance</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="psychology">Psychology</label>
+            <select id="psychology" name="psychology">
+              <option>0</option><option>3</option><option selected>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="confidence">Confidence</label>
+            <select id="confidence" name="confidence">
+              <option>0</option><option>3</option><option selected>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="tf_1d">1D</label>
+            <select id="tf_1d" name="tf_1d">
+              <option selected>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="tf_1h">1H</label>
+            <select id="tf_1h" name="tf_1h">
+              <option selected>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="tf_5m">5m</label>
+            <select id="tf_5m" name="tf_5m">
+              <option selected>0</option><option>3</option><option>5</option><option>7</option><option>9</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="rr">RR</label>
+            <select id="rr" name="rr">
+              <option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div class="field" id="rr-other-field" hidden>
+            <label for="rrOther">Custom RR <span class="req">*</span></label>
+            <input type="number" id="rrOther" name="rrOther" step="0.1" min="0" placeholder="e.g. 1.5">
+          </div>
+
+          <div class="field">
+            <label for="pnl">P&amp;L ($) <span class="req">*</span></label>
+            <input type="number" id="pnl" name="pnl" step="0.01" placeholder="profit: 150 · loss: -75" required>
+          </div>
+
+          <div class="field">
+            <label for="fee">Fee ($)</label>
+            <input type="number" id="fee" name="fee" step="0.01" min="0" placeholder="e.g. 5 (no minus sign)">
+          </div>
+
+          <div class="field full">
+            <label for="note">Note</label>
+            <textarea id="note" name="note" placeholder="What did you see? Why did you enter? What did you learn?"></textarea>
+          </div>
+
+          <div class="field full">
+            <label>Screenshot</label>
+            <div class="paste-zone" id="paste-zone" tabindex="0">
+              <div id="paste-placeholder">
+                📷 Paste a screenshot with <kbd>Ctrl</kbd>+<kbd>V</kbd>, click to browse, or drag &amp; drop
+              </div>
+              <div id="paste-preview" hidden>
+                <img id="shot-img" alt="Screenshot preview">
+                <button type="button" class="remove-shot" id="remove-shot">Remove screenshot</button>
+              </div>
+            </div>
+            <input type="file" id="file-input" accept="image/*" hidden>
+          </div>
+
+          <div class="field full">
+            <button type="submit" class="btn" id="submit-btn">Save Trade</button>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/add.js"></script>
+</body>
+</html>

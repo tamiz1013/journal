@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in — Trading Journal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <form class="card auth-card" id="auth-form">
+      <div class="brand" style="text-align:center">Trade<span>Journal</span></div>
+      <h1 class="auth-title">Welcome back</h1>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn" id="submit-btn">Log in</button>
+      <p class="auth-alt">No account? <a href="/signup.html">Sign up</a></p>
+    </form>
+  </div>
+  <script src="/js/common.js"></script>
+  <script>authForm('/api/auth/login', 'Logging in…');</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.example
+backups
+README.md
+.gitignore
+Dockerfile
+.dockerignore

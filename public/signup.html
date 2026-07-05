@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign up — Trading Journal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <form class="card auth-card" id="auth-form">
+      <div class="brand" style="text-align:center">Trade<span>Journal</span></div>
+      <h1 class="auth-title">Create your account</h1>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username"
+               pattern="[A-Za-z0-9_]{3,30}" title="3–30 letters, numbers or _" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password (min 6 characters)</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" minlength="6" required>
+      </div>
+      <button type="submit" class="btn" id="submit-btn">Sign up</button>
+      <p class="auth-alt">Already have an account? <a href="/login.html">Log in</a></p>
+    </form>
+  </div>
+  <script src="/js/common.js"></script>
+  <script>authForm('/api/auth/signup', 'Creating account…');</script>
+</body>
+</html>
