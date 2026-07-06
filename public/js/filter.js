@@ -5,6 +5,7 @@ let allTrades = [];
 const controls = {
   from: document.getElementById('f-from'),
   to: document.getElementById('f-to'),
+  day: document.getElementById('f-day'),
   asset: document.getElementById('f-asset'),
   direction: document.getElementById('f-direction'),
   type: document.getElementById('f-type'),
@@ -30,6 +31,7 @@ async function init() {
   for (const t of allTrades) {
     t.net = t.pnl - (t.fee || 0);
     t.outcome = t.net > 0 ? 'WIN' : t.net < 0 ? 'LOSS' : 'BE';
+    t.day = dayName(t.date);
   }
 
   fillOptions(controls.asset, unique(allTrades.map((t) => t.asset)));
@@ -70,6 +72,7 @@ function currentFilters() {
   return {
     from: controls.from.value,
     to: controls.to.value,
+    day: controls.day.value,
     asset: controls.asset.value,
     direction: controls.direction.value,
     type: controls.type.value,
@@ -84,6 +87,7 @@ function currentFilters() {
 function matches(t, f) {
   if (f.from && t.date < f.from) return false;
   if (f.to && t.date > f.to) return false;
+  if (f.day && t.day !== f.day) return false;
   if (f.asset && t.asset !== f.asset) return false;
   if (f.direction && t.direction !== f.direction) return false;
   if (f.type && t.type !== f.type) return false;

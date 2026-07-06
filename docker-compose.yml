@@ -9,4 +9,6 @@ services:
       - "3001:3000"
     env_file:
       - .env
+    environment:
+      TZ: Asia/Dhaka
     restart: always

@@ -139,13 +139,19 @@ function docShots(doc) {
   return doc.screenshot ? [doc.screenshot] : [];
 }
 
+// Today's date in the server's local timezone (set TZ in deployment), not UTC
+function todayLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 // Validate the request body into a trade document (shared by create and update)
 function buildTrade(b) {
   const required = ['asset', 'direction', 'type', 'strategy'];
   for (const f of required) {
     if (!b[f]) return { error: `Missing field: ${f}` };
   }
-  const asset = b.asset === 'OTHER' ? (b.assetOther || '').trim().toUpperCase() : b.asset;
+  const asset = (b.asset === 'OTHER' ? (b.assetOther || '') : String(b.asset)).trim().toUpperCase();
   if (!asset) return { error: 'Asset name is required' };
 
   const screenshots = (Array.isArray(b.screenshots) ? b.screenshots : [b.screenshot])
@@ -154,7 +160,7 @@ function buildTrade(b) {
 
   return {
     doc: {
-      date: b.date || new Date().toISOString().slice(0, 10),
+      date: b.date || todayLocal(),
       time: /^\d{2}:\d{2}$/.test(b.time || '') ? b.time : '',
       asset,
       direction: b.direction === 'SELL' ? 'SELL' : 'BUY',

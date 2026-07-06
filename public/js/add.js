@@ -21,8 +21,14 @@ const editId = new URLSearchParams(location.search).get('edit');
 let screenshots = []; // data URLs, max 3
 
 function setNow() {
-  document.getElementById('date').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('time').value = new Date().toTimeString().slice(0, 5);
+  // Local date, not toISOString() — UTC would give yesterday's date before 6 AM in UTC+6
+  const now = new Date();
+  document.getElementById('date').value = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+  ].join('-');
+  document.getElementById('time').value = now.toTimeString().slice(0, 5);
 }
 
 init();
@@ -75,6 +81,11 @@ function fillForm(t) {
   screenshots = t.screenshots || [];
   renderShots();
 }
+
+// Ticker names are always stored in capital letters
+assetOtherInput.addEventListener('input', () => {
+  assetOtherInput.value = assetOtherInput.value.toUpperCase();
+});
 
 // --- Conditional fields ---
 assetSel.addEventListener('change', () => {

@@ -368,6 +368,64 @@ function winPctByRating(trades, field) {
   });
 }
 
+// Per-weekday performance (Monday → Sunday)
+function dayOfWeekStats() {
+  const order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  return order.map((day) => {
+    const dayTrades = allTrades.filter((t) => dayName(t.date) === day);
+    const wins = dayTrades.filter((t) => t.outcome === 'WIN').length;
+    const losses = dayTrades.filter((t) => t.outcome === 'LOSS').length;
+    return {
+      day,
+      count: dayTrades.length,
+      net: dayTrades.reduce((s, t) => s + t.net, 0),
+      wins,
+      losses,
+      winPct: wins + losses ? (wins / (wins + losses)) * 100 : null,
+    };
+  });
+}
+
+function renderDayOfWeek() {
+  const stats = dayOfWeekStats();
+  document.getElementById('dow-row').hidden = false;
+
+  netBarChart('dow-pnl-chart', stats.map((s) => [s.day.slice(0, 3), s.net]), false);
+
+  new Chart(document.getElementById('dow-win-chart'), {
+    type: 'bar',
+    data: {
+      labels: stats.map((s) => s.day.slice(0, 3)),
+      datasets: [{
+        label: 'Win rate',
+        data: stats.map((s) => s.winPct),
+        backgroundColor: ACCENT,
+        borderRadius: 4,
+        maxBarThickness: 26,
+      }],
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0, max: 100,
+          grid: { color: TRACK },
+          border: { display: false },
+          ticks: { callback: (v) => v + '%' },
+        },
+        x: { grid: { display: false } },
+      },
+      plugins: {
+        tooltip: { callbacks: { label: (c) => {
+          const s = stats[c.dataIndex];
+          return s.winPct === null ? ' no closed trades'
+            : ` ${s.winPct.toFixed(0)}% · ${s.wins}W · ${s.losses}L · ${s.count} trade${s.count > 1 ? 's' : ''}`;
+        } } },
+      },
+    },
+  });
+}
+
 function renderAnalytics() {
   if (!allTrades.length) return;
   document.getElementById('analytics-row').hidden = false;
@@ -375,6 +433,7 @@ function renderAnalytics() {
 
   netBarChart('strategy-chart', groupNet(allTrades, (t) => t.strategy), true);
   netBarChart('asset-chart', groupNet(allTrades, (t) => t.asset), false);
+  renderDayOfWeek();
 
   new Chart(document.getElementById('mindset-chart'), {
     type: 'bar',
@@ -445,8 +504,16 @@ function renderInsights() {
   const sells = allTrades.filter((t) => t.direction === 'SELL' && t.outcome !== 'BE');
   const winRate = (arr) => (arr.length ? ((arr.filter((t) => t.outcome === 'WIN').length / arr.length) * 100).toFixed(0) + '%' : '—');
 
+  const tradedDays = dayOfWeekStats().filter((s) => s.count);
+  const bestDay = tradedDays.length
+    ? tradedDays.reduce((a, b) => (b.net > a.net ? b : a)) : null;
+  const worstDay = tradedDays.length > 1
+    ? tradedDays.reduce((a, b) => (b.net < a.net ? b : a)) : null;
+
   const rows = [
     ['Best strategy', best ? `${best[0]} (${fmtMoney(best[1])})` : '—', best && best[1] > 0 ? 'pos' : ''],
+    ['Best day', bestDay ? `${bestDay.day} (${fmtMoney(bestDay.net)})` : '—', bestDay && bestDay.net > 0 ? 'pos' : ''],
+    ['Worst day', worstDay ? `${worstDay.day} (${fmtMoney(worstDay.net)})` : '—', worstDay && worstDay.net < 0 ? 'neg' : ''],
     ['Worst strategy', worst && worst !== best ? `${worst[0]} (${fmtMoney(worst[1])})` : '—', worst && worst[1] < 0 ? 'neg' : ''],
     ['Most profitable asset', byAsset[0] ? `${byAsset[0][0]} (${fmtMoney(byAsset[0][1])})` : '—', byAsset[0] && byAsset[0][1] > 0 ? 'pos' : ''],
     ['Current streak', cur === 0 ? '—' : `${Math.abs(cur)} ${cur > 0 ? 'win' : 'loss'}${Math.abs(cur) > 1 ? 's' : ''}`, cur > 0 ? 'pos' : cur < 0 ? 'neg' : ''],

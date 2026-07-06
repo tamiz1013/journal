@@ -67,6 +67,13 @@ function authForm(endpoint, busyText) {
   });
 }
 
+// Day-of-week name for a YYYY-MM-DD date (parsed as local time, not UTC)
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+function dayName(dateStr) {
+  const [y, m, d] = String(dateStr).split('-').map(Number);
+  return DAY_NAMES[new Date(y, m - 1, d).getDay()] || '';
+}
+
 function fmtMoney(v) {
   const sign = v < 0 ? '-' : '';
   return `${sign}$${Math.abs(v).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
